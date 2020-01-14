@@ -155,6 +155,7 @@ def main(_):
       "qqp": classifier_utils.QqpProcessor,
       "qnli": classifier_utils.QnliProcessor,
       "wnli": classifier_utils.WnliProcessor,
+      "score": classifier_utils.ScoreProcessor,
   }
 
   tokenization.validate_case_matches_checkpoint(FLAGS.do_lower_case,
@@ -191,7 +192,7 @@ def main(_):
       do_lower_case=FLAGS.do_lower_case)
 
   label_list = processor.get_labels()
-
+  #print(label_list)
   if FLAGS.albert_hub_module_handle:
     tokenizer = tokenization.FullTokenizer.from_hub_module(
         hub_module=FLAGS.albert_hub_module_handle,
@@ -254,6 +255,7 @@ def main(_):
     if not cached_dir:
       cached_dir = FLAGS.output_dir
     train_file = os.path.join(cached_dir, task_name + "_train.tf_record")
+    print('train_file', train_file)
     if not tf.gfile.Exists(train_file):
       classifier_utils.file_based_convert_examples_to_features(
           train_examples, label_list, FLAGS.max_seq_length, tokenizer,
@@ -474,13 +476,13 @@ def main(_):
             str(class_probability)
             for class_probability in probabilities) + "\n"
         pred_writer.write(output_line)
-
         if task_name != "sts-b":
           actual_label = label_list[int(prediction["predictions"])]
         else:
           actual_label = str(prediction["predictions"])
         sub_writer.write(example.guid + "\t" + actual_label + "\n")
         num_written_lines += 1
+        print(actual_label)
     assert num_written_lines == num_actual_predict_examples
 
 
